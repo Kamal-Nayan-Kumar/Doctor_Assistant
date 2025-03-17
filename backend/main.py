@@ -2,39 +2,74 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from whisper_transcribe import transcribe_audio
 from chatbot import chatbot_response
-from summarizer import summarize_text
 from ocr_extraction import extract_text
+from summarizer import summarize_text
 
 app = Flask(__name__)
 CORS(app)
 
-# Route for speech-to-text (Whisper)
+# 1️⃣ Speech-to-text (Whisper)
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     audio_file = request.files['file']
     text = transcribe_audio(audio_file)
     return jsonify({"transcription": text})
 
-# Route for chatbot (Hugging Face)
+# 2️⃣ Chatbot for Symptoms, Disease Prediction, and Test Suggestions
 @app.route('/chatbot', methods=['POST'])
 def chat():
     user_message = request.json.get("message")
     response = chatbot_response(user_message)
     return jsonify({"reply": response})
 
-# Route for document summarization (Hugging Face)
+# 3️⃣ OCR for Medical Report
+@app.route('/extract-text', methods=['POST'])
+def ocr():
+    image_file = request.files['image']
+    extracted_text = extract_text(image_file)
+    return jsonify({"text": extracted_text})
+
+# 4️⃣ Summarizer for Medical Report
 @app.route('/summarize', methods=['POST'])
 def summarize():
     text = request.json.get("text")
     summary = summarize_text(text)
     return jsonify({"summary": summary})
 
-# Route for OCR (Tesseract.js)
-@app.route('/extract-text', methods=['POST'])
-def ocr():
-    image_file = request.files['image']
-    extracted_text = extract_text(image_file)
-    return jsonify({"text": extracted_text})
+# 5️⃣ Full Workflow (Test End-to-End)
+@app.route('/full-workflow', methods=['POST'])
+def full_workflow():
+    """Runs full process: Transcription → Chatbot → OCR → Summarization"""
+    try:
+        # Step 1: Transcribe audio
+        audio_file = request.files['file']
+        transcript = transcribe_audio(audio_file)
+
+        # Step 2: Get chatbot response
+        chatbot_result = chatbot_response(transcript)
+
+        # Step 3 (Optional): Extract text from report
+        if 'image' in request.files:
+            image_file = request.files['image']
+            extracted_text = extract_text(image_file)
+
+            # Step 4: Summarize extracted text
+            summary = summarize_text(extracted_text)
+
+            return jsonify({
+                "transcription": transcript,
+                "chatbot_reply": chatbot_result,
+                "extracted_text": extracted_text,
+                "summary": summary
+            })
+
+        return jsonify({
+            "transcription": transcript,
+            "chatbot_reply": chatbot_result
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,10 +1,20 @@
-import requests
+import google.generativeai as genai
+import os
+from dotenv import load_dotenv
 
-HUGGINGFACE_API_TOKEN = "your api key"
-MODEL_NAME = "facebook/bart-large-cnn"
+# Load environment variables (API key)
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Configure Gemini API
+genai.configure(api_key=GEMINI_API_KEY)
 
 def summarize_text(text):
-    headers = {"Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"}
-    payload = {"inputs": text}
-    response = requests.post(f"https://api-inference.huggingface.co/models/{MODEL_NAME}", headers=headers, json=payload)
-    return response.json()[0]['summary_text']
+    """Summarize text using Gemini API."""
+    try:
+        model = genai.GenerativeModel("gemini-1.5-pro")
+        prompt = f"Summarize the following text:\n{text}"
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Error: {str(e)}"
