@@ -13,7 +13,9 @@ def chatbot_response(user_message):
     """Get response from Gemini chatbot."""
     try:
         model = genai.GenerativeModel("gemini-1.5-pro")
-        response = model.generate_content(user_message)
+        response = model.generate_content(
+            f"{user_message}. Format response in markdown with clear section headings."
+        )
         return response.text
     except Exception as e:
         return f"Error: {str(e)}"

@@ -13,7 +13,7 @@ def summarize_text(text):
     """Summarize text using Gemini API."""
     try:
         model = genai.GenerativeModel("gemini-1.5-pro")
-        prompt = f"Summarize the following text:\n{text}"
+        prompt = f"Summarize the following medical report:\n{text}"
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:

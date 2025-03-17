@@ -46,7 +46,18 @@ def full_workflow():
         transcript = transcribe_audio(audio_file)
 
         # Step 2: Get chatbot response
-        chatbot_result = chatbot_response(transcript)
+
+        health_prompt = f"""Act as a senior health expert. Analyze this doctor-patient conversation:
+        {transcript}
+        
+        Provide structured response with:
+        - Key symptoms observed
+        - Potential diagnoses (list 3 possibilities)
+        - Recommended medical tests
+        - Urgency level (low/medium/high)
+        - Brief clinical rationale"""
+
+        chatbot_result = chatbot_response(health_prompt)
 
         # Step 3 (Optional): Extract text from report
         if 'image' in request.files:

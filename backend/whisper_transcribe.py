@@ -1,7 +1,7 @@
 import whisper
 
 # Load a smaller Whisper model
-model = whisper.load_model("tiny")  # Try "small" if accuracy is needed
+model = whisper.load_model("tiny")  
 
 def transcribe_audio(audio_file):
     file_path = "test.mp3"
